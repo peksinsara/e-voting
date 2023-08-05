@@ -22,6 +22,7 @@ func main() {
 	adminRouter.HandleFunc("/alldata", user.GetAllData).Methods("GET")
 	adminRouter.HandleFunc("/candidate/{id}", user.DeleteCandidate).Methods("DELETE")
 	router.HandleFunc("/profile", user.GetProfile).Methods("GET")
+	router.HandleFunc("/candidates", user.GetAllCandidates).Methods("GET")
 
 	router.HandleFunc("/vote", function.CastVote).Methods("POST")
 

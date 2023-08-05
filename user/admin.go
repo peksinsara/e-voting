@@ -60,6 +60,33 @@ func AddCandidate(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(response)
 }
 
+// GetAllCandidates handles the endpoint to get a list of all candidates
+func GetAllCandidates(w http.ResponseWriter, r *http.Request) {
+	db := database.GetDB()
+
+	rows, err := db.Query("SELECT candidate_id, full_name, district, short_bio FROM Candidate")
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+	defer rows.Close()
+
+	candidates := []Candidate{}
+	for rows.Next() {
+		var candidate Candidate
+		err := rows.Scan(&candidate.CandidateID, &candidate.FullName, &candidate.District, &candidate.ShortBio)
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+		candidates = append(candidates, candidate)
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(candidates)
+}
+
+
 // DeleteCandidate handles the admin endpoint to delete a candidate by ID
 func DeleteCandidate(w http.ResponseWriter, r *http.Request) {
 	// Get the candidate ID from the path parameters
