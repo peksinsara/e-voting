@@ -36,6 +36,26 @@ Authenticate a user and retrieve their login information.
     }
     ```
 
+### User Log out
+
+Log outs user from profile and deletes token
+
+- Endpoint: `POST /logout`
+
+
+#### Get User Data
+
+Retrieve currently logged in user data.
+
+- Endpoint: `GET /profile`
+
+
+#### Get Candidates Data
+
+Retrieve candidates data.
+
+- Endpoint: `GET /candidates`
+
 ### Admin Actions
 
 The following endpoints require admin authentication.
@@ -79,7 +99,7 @@ Vote for a candidate in the election.
     {
         "user_id": 1,
         "candidate_id": 2,
-        "num_votes": 1
+
     }
     ```
 
