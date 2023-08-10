@@ -1,6 +1,7 @@
 package user
 
 import (
+	"database/sql"
 	"encoding/json"
 	"errors"
 	"net/http"
@@ -74,7 +75,29 @@ func RegisterUser(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	// Perform validation checks
+	if !isValidPhoneNumber(user.PhoneNumber) {
+		http.Error(w, "Invalid phone number format", http.StatusBadRequest)
+		return
+	}
+
+	if !isValidJMBG(user.JMBG) {
+		http.Error(w, "Invalid JMBG format", http.StatusBadRequest)
+		return
+	}
+
 	db := database.GetDB()
+
+	// Check if email, JMBG, or phone number already exist in the database
+	var existingUser User
+	err = db.QueryRow("SELECT user_id FROM User WHERE email = ? OR jmbg = ? OR phone_number = ?", user.Email, user.JMBG, user.PhoneNumber).Scan(&existingUser.UserID)
+	if err == nil {
+		http.Error(w, "User with the same email, JMBG, or phone number already exists", http.StatusConflict)
+		return
+	} else if err != sql.ErrNoRows {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
 
 	stmt, err := db.Prepare("INSERT INTO User (full_name, mothers_name, email, phone_number, jmbg, password, is_admin) VALUES (?, ?, ?, ?, ?, ?, ?)")
 	if err != nil {
@@ -172,4 +195,12 @@ func LogoutUser(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Authorization", "")
 	w.WriteHeader(http.StatusOK)
 	w.Write([]byte("User logged out successfully"))
+}
+
+func isValidPhoneNumber(phoneNumber string) bool {
+	return len(phoneNumber) >= 9 && len(phoneNumber) <= 12
+}
+
+func isValidJMBG(jmbg string) bool {
+	return len(jmbg) == 13
 }
