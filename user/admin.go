@@ -16,6 +16,7 @@ type Candidate struct {
 	FullName    string `json:"full_name"`
 	District    string `json:"district"`
 	ShortBio    string `json:"short_bio"`
+	TotalVotes  int    `json:"total_votes"`
 }
 
 // AddCandidate handles the admin endpoint to add a new candidate
@@ -64,7 +65,7 @@ func AddCandidate(w http.ResponseWriter, r *http.Request) {
 func GetAllCandidates(w http.ResponseWriter, r *http.Request) {
 	db := database.GetDB()
 
-	rows, err := db.Query("SELECT candidate_id, full_name, district, short_bio FROM Candidate")
+	rows, err := db.Query("SELECT candidate_id, full_name, district, short_bio, total_votes FROM Candidate")
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
@@ -74,7 +75,7 @@ func GetAllCandidates(w http.ResponseWriter, r *http.Request) {
 	candidates := []Candidate{}
 	for rows.Next() {
 		var candidate Candidate
-		err := rows.Scan(&candidate.CandidateID, &candidate.FullName, &candidate.District, &candidate.ShortBio)
+		err := rows.Scan(&candidate.CandidateID, &candidate.FullName, &candidate.District, &candidate.ShortBio, &candidate.TotalVotes)
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return
@@ -85,7 +86,6 @@ func GetAllCandidates(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(candidates)
 }
-
 
 // DeleteCandidate handles the admin endpoint to delete a candidate by ID
 func DeleteCandidate(w http.ResponseWriter, r *http.Request) {
